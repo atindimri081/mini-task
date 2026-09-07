@@ -10,29 +10,34 @@ jobs:
     runs-on: [self-hosted, linux, x64]
 
     steps:
-      - name: Checkout code
+      - name: Checkout workflow
         uses: actions/checkout@v6
 
-      - name: Show server environment
+      - name: Update production code
         run: |
-          php -v
-          composer --version
-          git --version
+          cd /var/www/mini-task
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Install Composer dependencies
+        working-directory: /var/www/mini-task
         run: composer install --no-dev --optimize-autoloader
 
       - name: Run database migrations
+        working-directory: /var/www/mini-task
         run: php artisan migrate --force
 
-      - name: Cache Laravel configuration
+      - name: Cache Laravel
+        working-directory: /var/www/mini-task
         run: |
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
 
       - name: Optimize Laravel
+        working-directory: /var/www/mini-task
         run: php artisan optimize
 
       - name: Health check
+        working-directory: /var/www/mini-task
         run: php artisan about
